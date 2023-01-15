@@ -1,7 +1,7 @@
 # urlquery-cli
 
 
-A simple tool for interacting with urlquery.net from the command line.
+A simple tool for interacting with urlquery.net from the command line. urlquery is a automated online service for analysing websites for malicious and suspicous content.
 
 Currently submitting, retriving a report and checking reputation on URLs are supported through the public API
 
@@ -9,7 +9,6 @@ Currently submitting, retriving a report and checking reputation on URLs are sup
 
 # Usage
 
-The pattern to follow is
 ```
 Usage:
   urlquery-cli [command]
@@ -29,9 +28,9 @@ Flags:
 Use "urlquery-cli [command] --help" for more information about a command.
 ```
 
-### Commands
+## Commands
 
-#### submit
+### submit
 Submitting a URL
 ```
 $ urlquery-cli submit urlquery.net
@@ -51,7 +50,7 @@ To grab the report run:
    urlquery-cli report 688a87d0-0314-45d8-8676-ebcb7cb63dd8
 ```
 
-#### report
+### report
 Retrives a report and prints a breif summary
 
 ```
@@ -67,7 +66,7 @@ Alerts
   blocklist: 0
 ```
 
-#### rep-check
+### rep-check
 
 Checking reputation on a URL
 ```

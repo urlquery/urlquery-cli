@@ -31,7 +31,7 @@ func main() {
 }
 
 func SubmitCmd(cmd *cobra.Command, args []string) {
-	data, err := public.NewDefaultRequest().SubmitURL(args[0])
+	data, err := public.NewRequest(apikey).SubmitURL(args[0])
 	if err != nil {
 		fmt.Println("ERROR", err)
 		return
@@ -64,7 +64,7 @@ func SubmitCmd(cmd *cobra.Command, args []string) {
 
 func ReportCmd(cmd *cobra.Command, args []string) {
 	report_id := args[0]
-	data, err := public.NewDefaultRequest().GetReport(report_id)
+	data, err := public.NewRequest(apikey).GetReport(report_id)
 	if err != nil {
 		fmt.Println("ERROR", err)
 		return
@@ -99,7 +99,7 @@ func ReportCmd(cmd *cobra.Command, args []string) {
 
 func ScreenshotCmd(cmd *cobra.Command, args []string) {
 	report_id := args[0]
-	data, err := public.NewDefaultRequest().GetScreenshot(report_id)
+	data, err := public.NewRequest(apikey).GetScreenshot(report_id)
 	if err != nil {
 		fmt.Println("ERROR", err)
 		return
@@ -116,6 +116,6 @@ func ScreenshotCmd(cmd *cobra.Command, args []string) {
 }
 
 func RepCheckCmd(cmd *cobra.Command, args []string) {
-	data, _ := public.NewDefaultRequest().CheckReputation(args[0])
+	data, _ := public.NewRequest(apikey).CheckReputation(args[0])
 	fmt.Println(data)
 }
