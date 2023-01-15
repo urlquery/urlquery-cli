@@ -20,7 +20,7 @@ func main() {
 	var rootCmd = &cobra.Command{Use: "urlquery-cli", DisableAutoGenTag: true}
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.PersistentFlags().StringVar(&apikey, "apikey", "", "API key")
-	rootCmd.PersistentFlags().StringVar(&output, "output", "stdout", "Output (stdout, file)")
+	reportCmd.PersistentFlags().StringVar(&output, "output", "stdout", "Output (stdout, file)")
 
 	rootCmd.AddCommand(submitCmd)
 	rootCmd.AddCommand(reportCmd)
@@ -111,6 +111,7 @@ func ScreenshotCmd(cmd *cobra.Command, args []string) {
 		fmt.Println("ERROR", err)
 		return
 	}
+
 	file.Write(data)
 	fmt.Printf("Screenshot written to: %s\n", filename)
 }

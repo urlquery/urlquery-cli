@@ -53,6 +53,8 @@ To grab the report run:
 ### report
 Retrives a report and prints a breif summary
 
+ * `--output=file` stores the report in a file
+
 ```
 $ urlquery-cli report c3577be1-0260-45e8-87b9-e4e60292168b
 Report URL: https://urlquery.net/report/c3577be1-0260-45e8-87b9-e4e60292168b
@@ -66,9 +68,17 @@ Alerts
   blocklist: 0
 ```
 
-### rep-check
+### screenshot
+Downloads the screenshot of a report, image is saved as a png file
 
-Checking reputation on a URL
+```
+$ urlquery-cli screenshot 688a87d0-0314-45d8-8676-ebcb7cb63dd8
+Screenshot written to: urlquery_screenshot_688a87d0-0314-45d8-8676-ebcb7cb63dd8.png
+```
+
+### rep-check
+Check reputation on a URL
+
 ```
 $ urlquery-cli rep-check enareuoasrec.com/all/login.php
 {"url":"enareuoasrec.com/all/login.php","verdict":"phishing","details":null}
