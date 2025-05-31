@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/urlquery-cli/internal/api"
+	"github.com/urlquery/urlquery-cli/internal/api"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

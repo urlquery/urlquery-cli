@@ -1,6 +1,6 @@
 package main
 
-import "github.com/urlquery-cli/cmd"
+import "github.com/urlquery/urlquery-cli/cmd"
 
 func main() {
 	cmd.Execute()

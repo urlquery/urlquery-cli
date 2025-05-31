@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/urlquery-cli/internal/api"
+	"github.com/urlquery/urlquery-cli/internal/api"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"

@@ -1,4 +1,4 @@
-module github/urlquery-cli
+module github.com/urlquery/urlquery-cli
 
 go 1.22.2
 
