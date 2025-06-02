@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/urlquery/urlquery-cli/internal/api"
 
 	"github.com/spf13/cobra"
@@ -18,17 +19,14 @@ var offsetSearch int
 var searchCmd = &cobra.Command{
 	Use:   "search <query>",
 	Short: "Search for reports in urlquery.net.",
-	Long:  "Searches urlquery.net for reports related to a domain, IP, or keyword.",
-	Args:  cobra.ExactArgs(1),
+	Long: `Searches urlquery.net for reports related to a domain, IP, or keyword.
+For more details check out: https://urlquery.net/help/search`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		search_query := args[0]
 
-		// Ensure API key is available
+		// API key
 		apikey := viper.GetString("apikey")
-		if apikey == "" {
-			fmt.Println("Error: API Key is required. Set it via 'config set apikey <value>' or use the --apikey flag.")
-			os.Exit(1)
-		}
 
 		// Initialize API client
 		client, err := api.NewClient(api.ApiKey(apikey))
@@ -44,29 +42,38 @@ var searchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		format := "json"
-		switch format {
-		case "summary":
-			fmt.Println("Search Query: ", results.Query)
+		summary := viper.GetBool("summary")
+		if summary {
+
+			fmt.Printf("🔍 Search Query: %s\n", results.Query)
+			fmt.Printf("Hits:    %d\n", results.TotalHits)
+			fmt.Printf("Limit:   %d\n", results.Limit)
+			fmt.Printf("Offset:  %d\n\n", results.Offset)
 
 			for _, v := range results.Reports {
-				fmt.Println("")
-				fmt.Printf("Report ID: %s\n", v.ID)
-				fmt.Printf("URL:  %s\n", v.Url.Addr)
-				fmt.Printf("Tags: %s\n", strings.Join(v.Tags, ","))
-				fmt.Printf("Detections: %d\n", v.Stats.AlertCount.Urlquery)
-			}
+				url := v.Url.Addr
+				if len(url) > 76 {
+					url = url[:70] + " (...)"
+				}
 
-		case "json":
-			fallthrough
-		default:
-			output, err := json.MarshalIndent(results, "", "  ")
-			if err != nil {
-				fmt.Println("Error formatting response:", err)
-				os.Exit(1)
+				fmt.Println("\n--------------------------------------------------------------------------------")
+				// fmt.Printf("📝 Report ID:  %s\n", v.ID)
+				color.New(color.Bold).Printf("📝 Report ID:  %s\n", v.ID)
+				fmt.Printf("🔗 URL:        %s\n", url)
+				fmt.Printf("🚨 Detections: %d\n", v.Stats.AlertCount.Urlquery)
+				fmt.Printf("🏷️  Tags:       %s\n", strings.Join(v.Tags, " "))
 			}
-			fmt.Println(string(output))
+			fmt.Println("")
+			return
 		}
+
+		// Default full JSON output
+		output, err := json.MarshalIndent(results, "", "  ")
+		if err != nil {
+			fmt.Println("Error formatting response:", err)
+			os.Exit(1)
+		}
+		fmt.Println(string(output))
 
 	},
 }

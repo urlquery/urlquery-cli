@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/urlquery/urlquery-cli/internal/api"
 
 	"github.com/spf13/cobra"
@@ -22,24 +23,20 @@ The URL will be analyzed in a sandbox environment. The submission can be made wi
 Requires an API key (set via 'config set apikey <value>' or --apikey).
 
 Example:
-	urlquery-cli submit http://example.com
+	urlquery-cli submit http://urlquery.net
 `,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		submit_url := args[0]
 
 		apikey := viper.GetString("apikey")
-		if apikey == "" {
-			fmt.Println("Error: API Key is required. Set it via 'config set apikey <value>' or use the --apikey flag.")
-			os.Exit(1)
-		}
 
 		var job api.SubmitJob
 		job.Url = submit_url
 
 		job.UserAgent = viper.GetString("useragent")
 		if job.UserAgent == "" {
-			job.UserAgent = "default"
+			job.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0"
 		}
 
 		job.Access = viper.GetString("access")
@@ -59,24 +56,27 @@ Example:
 			return
 		}
 
-		format := "json"
-		switch format {
-		case "summary":
-			fmt.Println("Submitted URL:")
-			fmt.Printf("URL: %s\n", response.Url.Addr)
-			fmt.Printf("Queue ID: %s\n", response.QueueID)
-			fmt.Printf("Status: %s\n", response.Status)
+		summary := viper.GetBool("summary")
+		if summary {
 
-		case "json":
-			fallthrough
-		default:
-			output, err := json.MarshalIndent(response, "", "  ")
-			if err != nil {
-				fmt.Println("Error formatting response:", err)
-				os.Exit(1)
-			}
-			fmt.Println(string(output))
+			bold := color.New(color.Bold).SprintFunc()
+			fmt.Println("Submitted URL:")
+			fmt.Printf("🔗 URL:      %s\n", bold(response.Url.Addr))
+			fmt.Printf("🆔 Queue ID: %s\n", response.QueueID)
+			fmt.Printf("📊 Status:   %s\n", response.Status)
+			fmt.Println("")
+			fmt.Printf("https://urlquery.net/queue/%s\n", response.QueueID)
+			return
 		}
+
+		// Default JSON output
+		output, err := json.MarshalIndent(response, "", "  ")
+		if err != nil {
+			fmt.Println("Error formatting response:", err)
+			os.Exit(1)
+		}
+		fmt.Println(string(output))
+
 	},
 }
 

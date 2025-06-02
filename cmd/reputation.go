@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/urlquery/urlquery-cli/internal/api"
 
@@ -14,7 +15,7 @@ import (
 var reputationCmd = &cobra.Command{
 	Use:   "reputation <url>",
 	Short: "Check the reputation of a URL.",
-	Long: `Check the reputation of a given URL using urlquery.net.
+	Long: `Check the reputation of a given URL using urlquery.net
 
 This command queries the urlquery reputation API.
 
@@ -22,22 +23,14 @@ Requires a valid API key (set via 'config set apikey <value>' or the --apikey fl
 
 Example:
 	urlquery-cli reputation http://example.com
+	urlquery-cli reputation www.youtube.com/watch?v=dQw4w9WgXcQ
 `,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		reputation_url := args[0]
 
-		if args[0] == "help" {
-			cmd.Help()
-			return
-		}
-
-		// Ensure API key is available
+		// API key
 		apikey := viper.GetString("apikey")
-		if apikey == "" {
-			fmt.Println("Error: API Key is required. Set it via 'config set apikey <value>' or use the --apikey flag.")
-			os.Exit(1)
-		}
 
 		// Initialize API client
 		client, err := api.NewClient(api.ApiKey(apikey))
@@ -53,22 +46,37 @@ Example:
 			os.Exit(1)
 		}
 
-		format := "json"
-		switch format {
-		case "summary":
-			fmt.Println("Reputation Summary:")
-			fmt.Printf("  URL:     %s\n", response.Url)
-			fmt.Printf("  Verdict: %s\n", response.Verdict)
-		case "json":
-			fallthrough
-		default:
-			out, err := json.MarshalIndent(response, "", "  ")
-			if err != nil {
-				fmt.Println("Error formatting response:", err)
-				os.Exit(1)
+		summary := viper.GetBool("summary")
+		if summary {
+
+			fmt.Println("🔎 Reputation Summary")
+			fmt.Println("────────────────────────────────────────────────────────────")
+			fmt.Printf("🔗 URL:     %s\n", response.Url)
+
+			// Optionally add a verdict icon
+			var verdictIcon string
+			switch response.Verdict {
+			case "malicious":
+				verdictIcon = "🚫"
+			case "suspicious":
+				verdictIcon = "⚠️"
+			case "benign":
+				verdictIcon = "✅"
+			default:
+				verdictIcon = "❔"
+				verdictIcon = ""
 			}
-			fmt.Println(string(out))
+			fmt.Printf("🛡️  Verdict: %s %s\n", verdictIcon, strings.Title(response.Verdict))
+			return
 		}
+
+		// Default JSON output
+		out, err := json.MarshalIndent(response, "", "  ")
+		if err != nil {
+			fmt.Println("Error formatting response:", err)
+			os.Exit(1)
+		}
+		fmt.Println(string(out))
 
 	},
 }
