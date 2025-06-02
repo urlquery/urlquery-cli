@@ -30,11 +30,8 @@ type httpClient struct {
 	baseURL string
 	client  *http.Client
 
-	// Used to add custom headers to request
 	headerProperty map[string]string
-
-	// Authentication - API KEY
-	apiKey string
+	apiKey         string
 }
 
 func NewClient(opts ...OptionsClientFunc) (*httpClient, error) {
@@ -55,10 +52,18 @@ func NewClient(opts ...OptionsClientFunc) (*httpClient, error) {
 	return client, nil
 }
 
-// Client option to use API Key Authentication
+// API Key Authentication
 func ApiKey(key string) OptionsClientFunc {
 	return func(client *httpClient) error {
 		client.apiKey = key
+		return nil
+	}
+}
+
+// Custom API Gateway
+func ApiGWBase(apigw_base string) OptionsClientFunc {
+	return func(client *httpClient) error {
+		client.baseURL = apigw_base
 		return nil
 	}
 }
