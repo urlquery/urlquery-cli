@@ -164,6 +164,7 @@ github.com                                                          2007-10-09  
 lezandieolivier.com                                                 2020-11-26   2025-06-02   2025-06-02      324 B      634 B      0
 code.jquery.com                                                     2005-12-10   2012-05-21   2025-05-28     270 kB     1.3 kB      0
 ---
+```
 
 ## Development
 
