@@ -1,6 +1,6 @@
 # urlquery-cli
 
-A command-line tool for interacting with [urlquery.net](https://urlquery.net), allowing you to submit URLs for sandbox analysis, check URL reputations, and download reports, screenshots, and resources.
+A command-line tool for interacting with [urlquery.net](https://urlquery.net), allowing you to submit URLs for analysis, check URL reputations, and download reports, screenshots, and resources.
 
 ## Features
 
@@ -43,7 +43,7 @@ urlquery-cli config set apikey <your-api-key>
 Optional settings:
 
 ```bash
-urlquery-cli config set useragent "MyScanner/1.0"
+urlquery-cli config set useragent "curl/7.81.0"
 urlquery-cli config set access "private"
 ```
 
@@ -54,7 +54,7 @@ urlquery-cli config set access "private"
 ### Submit a URL
 
 ```bash
-urlquery-cli submit https://example.com
+urlquery-cli submit https://urlquery.net
 ```
 
 You can configure visibility and user-agent via config or flags.
@@ -68,7 +68,7 @@ urlquery-cli submit status <queue_id>
 ### Check URL reputation
 
 ```bash
-urlquery-cli reputation https://example.com
+urlquery-cli reputation google.com
 ```
 
 ### Retrieve scan results
@@ -86,20 +86,29 @@ You can specify an output directory with `--output`:
 urlquery-cli report <report_id> screenshot --output ./downloads
 ```
 
+Get a quick summary of the data with `--summary`:
+
+```bash
+urlquery-cli report <report_id> report --summary
+```
+
+
 ---
 
 ## Examples
 
 ```bash
 # Submit a URL for scanning
-urlquery-cli submit https://test.com
+urlquery-cli submit https://urlquery.net
 
-# Check if the scan is finished
-urlquery-cli submit status <queue_id>
-
-# Get scan results
-urlquery-cli report <report_id> report
+# Get scan report
+urlquery-cli report 5e085255-6d43-4dfb-a2cf-add81f84a67d report
 ```
+
+```bash
+urlquery-cli report 5e085255-6d43-4dfb-a2cf-add81f84a67d report --summary
+```
+![Summary output](./images/report_summary.png)
 
 ---
 
