@@ -8,41 +8,53 @@ import (
 	"github.com/spf13/viper"
 )
 
-var apiKey string
 var cfgFile string
+var outputSummary bool
 
 func init() {
-	// cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig)
 
-	// Define API key flag but don't enforce it as required here
-	rootCmd.PersistentFlags().String("apikey", "", "API Key (can be set via config file or flag)")
+	// Config file path flag (not used as a Viper key)
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Path to config file (default is $HOME/.urlquery-cli.yaml)")
+
+	// Global flags
+	rootCmd.PersistentFlags().String("apikey", "", "API Key (can also be set via config file or URLQUERY_APIKEY env var)")
 	viper.BindPFlag("apikey", rootCmd.PersistentFlags().Lookup("apikey"))
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "output", "", "Location to store downloaded fetched data (reports, screenshot, files)")
+	rootCmd.PersistentFlags().String("output", "", "Location to store downloaded data (reports, screenshots, files)")
 	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 
-	// Config
-	configCmd.AddCommand(configShowCmd)
-	configCmd.AddCommand(configSetCmd)
-	configCmd.AddCommand(configUnsetCmd)
+	rootCmd.PersistentFlags().Bool("summary", false, "Show a summary output instead of full json")
+	viper.BindPFlag("summary", rootCmd.PersistentFlags().Lookup("summary"))
 
-	// Submit
+	// env settings
+	viper.SetEnvPrefix("urlquery")
+	viper.AutomaticEnv()
+
+	// Submit command flags
 	submitCmd.Flags().String("useragent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0", "Override default user agent")
-	submitCmd.Flags().String("access", "public", "Override default access (public, restricted, private)")
+	submitCmd.Flags().String("access", "public", "Override default access level (public, restricted, private)")
 	viper.BindPFlag("useragent", submitCmd.Flags().Lookup("useragent"))
 	viper.BindPFlag("access", submitCmd.Flags().Lookup("access"))
 	submitCmd.AddCommand(submitStatusCmd)
 
-	// Search
-	searchCmd.Flags().IntVar(&limitSearch, "limit", 10, "Maxium number of results to return")
-	searchCmd.Flags().IntVar(&offsetSearch, "offset", 0, "Search  offset")
-	// searchCmd.Flags().StringVar(&report_id, "type", "", "Search query (required)")
+	// Search command flags
+	searchCmd.Flags().IntVar(&limitSearch, "limit", 10, "Maximum number of results to return")
+	searchCmd.Flags().IntVar(&offsetSearch, "offset", 0, "Offset for paginated search results")
 
+	reportCmd.Flags().BoolVar(&outputSummary, "summary", false, "Show summary output instead of full report")
+
+	// Register commands
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(reportCmd)
 	rootCmd.AddCommand(submitCmd)
 	rootCmd.AddCommand(reputationCmd)
 	rootCmd.AddCommand(searchCmd)
+
+	// Add subcommands
+	configCmd.AddCommand(configShowCmd)
+	configCmd.AddCommand(configSetCmd)
+	configCmd.AddCommand(configUnsetCmd)
 }
 
 var rootCmd = &cobra.Command{
@@ -50,43 +62,31 @@ var rootCmd = &cobra.Command{
 	Short: "CLI for interacting with urlquery.net",
 	Long:  `A command-line interface for querying and analyzing URLs via the urlquery API.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if cfgFile != "" {
-			viper.SetConfigFile(cfgFile)
-		} else {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				fmt.Println("Error finding home directory:", err)
-				os.Exit(1)
-			}
-			viper.AddConfigPath(home)
-			viper.SetConfigName(".urlquery-cli")
-			viper.SetConfigType("yaml")
-		}
-
-		viper.AutomaticEnv()
-		if err := viper.ReadInConfig(); err == nil {
-			// fmt.Println("Using config file:", viper.ConfigFileUsed())
-		}
+		initConfig()
 
 		// Override with flags **only if they are set**
 		if cmd.Flags().Changed("apikey") {
 			viper.Set("apikey", cmd.Flag("apikey").Value.String())
 		}
+
 		if cmd.Flags().Changed("output") {
 			viper.Set("output", cmd.Flag("output").Value.String())
 		}
 
-		if cmd.Flags().Changed("base_url") {
-			viper.Set("base_url", cmd.Flag("base_url").Value.String())
+		if cmd.Flags().Changed("summary") {
+			viper.Set("summary", cmd.Flag("summary").Value.String())
 		}
 
-		// Retrieve final API key value
+		if cmd.Flags().Changed("apigw_base") {
+			viper.Set("apigw_base", cmd.Flag("apigw_base").Value.String())
+		}
+
+		// Check API key value
 		apiKey := viper.GetString("apikey")
 		if apiKey == "" {
-			fmt.Println("Error: API Key is required. Set it via --apikey flag or in the config file.")
+			fmt.Println("Error: API Key is required. Set it via 'config set apikey <value>' or use the --apikey flag.")
 			os.Exit(1)
 		}
-
 	},
 }
 
@@ -98,24 +98,24 @@ func Execute() {
 }
 
 func initConfig() {
-	var cfgFile string
+
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
 		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".urlquery" (without extension).
+		if err != nil {
+			fmt.Println("Error finding home directory:", err)
+			os.Exit(1)
+		}
 		viper.AddConfigPath(home)
+		viper.SetConfigName(".urlquery-cli")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".urlquery")
 	}
 
+	viper.SetEnvPrefix("urlquery")
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		// fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }
