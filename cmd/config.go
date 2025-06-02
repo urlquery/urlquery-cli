@@ -31,6 +31,9 @@ Examples:
   urlquery-cli config set apikey abc123
   urlquery-cli config set output ./downloads
   urlquery-cli config set access public
+
+  urlquery-cli config unset access
+  urlquery-cli config unset apikey
 `,
 }
 
@@ -47,9 +50,10 @@ var configShowCmd = &cobra.Command{
 }
 
 var allowedConfigKeys = map[string]bool{
-	"apikey": true,
-	"output": true,
-	"access": true,
+	"apikey":    true,
+	"output":    true,
+	"access":    true,
+	"useragent": true,
 }
 
 var allowedAccessValues = map[string]bool{
