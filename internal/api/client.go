@@ -79,6 +79,7 @@ func (c *httpClient) NewRequest(method string, path string, body io.Reader) (*ht
 		req.Header.Add("x-apikey", c.apiKey)
 	}
 
+	req.Header.Add("User-Agent", "urlquery-cli/1.0 (+https://github.com/urlquery/urlquery-cli)")
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
