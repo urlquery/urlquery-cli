@@ -6,6 +6,7 @@
 *.dylib
 urlquery-cli
 .vscode
+dist
 
 # Test binary, built with `go test -c`
 *.test
