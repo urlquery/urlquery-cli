@@ -89,6 +89,10 @@ Examples:
 						os.Exit(1)
 					}
 
+					tmp := SummarizeReport(&parsed)
+					fmt.Println(tmp)
+					return
+
 					fmt.Printf("📝 Report Summary:  %s\n", report.ID)
 					fmt.Printf("🔗 Submitted URL:   %s\n", report.Url.Addr)
 					fmt.Printf("🔗 Final URL:       %s\n", report.Final.Url.Addr)
