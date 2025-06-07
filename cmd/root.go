@@ -11,6 +11,21 @@ import (
 var cfgFile string
 var outputSummary bool
 
+// Version information
+var (
+	version   = "dev"
+	buildTime = "unknown"
+	gitCommit = "unknown"
+)
+
+// SetVersionInfo sets the version information for the CLI
+func SetVersionInfo(v, bt, gc string) {
+	version = v
+	buildTime = bt
+	gitCommit = gc
+	rootCmd.Version = v
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 
@@ -50,6 +65,7 @@ func init() {
 	rootCmd.AddCommand(submitCmd)
 	rootCmd.AddCommand(reputationCmd)
 	rootCmd.AddCommand(searchCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	// Add subcommands
 	configCmd.AddCommand(configShowCmd)
