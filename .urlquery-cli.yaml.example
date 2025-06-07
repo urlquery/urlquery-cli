@@ -1,0 +1,16 @@
+# URLQuery CLI Configuration File
+# Copy this file to ~/.urlquery-cli.yaml and customize as needed
+
+# API Configuration
+apikey: ""  # Your URLQuery API key (required)
+
+# Default settings
+output: ""  # Default output directory for downloads
+summary: false  # Show summary output by default
+
+# Submit defaults
+useragent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0"
+access: "public"  # Default access level: public, restricted, private
+
+# Advanced settings (optional)
+# apigw_base: "https://api.urlquery.net"  # Custom API gateway base URL
