@@ -2,7 +2,9 @@ package api
 
 import (
 	"compress/gzip"
+	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -11,16 +13,20 @@ import (
 const (
 	DefaultUrlqueryAPI string        = "https://api.urlquery.net"
 	DefaultHTTPTimeout time.Duration = 30 * time.Second
+	DefaultUserAgent   string        = "urlquery-cli/1.0 (+https://github.com/urlquery/urlquery-cli)"
 )
 
-// Default Argus Client
-// NewClient should not return any error with called without any options, and therefore safe to ignore
+// Default Client
+// NewClient should not return any error when called without any options, and therefore safe to ignore
 var DefaultClient, _ = NewClient()
 
+// Client defines the interface for HTTP operations
 type Client interface {
 	NewRequest(method string, path string, body io.Reader) (*http.Request, error)
+	NewRequestWithContext(ctx context.Context, method string, path string, body io.Reader) (*http.Request, error)
 	Do(req *http.Request) (*http.Response, error)
 	DoRequest(method string, path string, body io.Reader) (*http.Response, error)
+	DoRequestWithContext(ctx context.Context, method string, path string, body io.Reader) (*http.Response, error)
 }
 
 type OptionsClientFunc func(client *httpClient) error
@@ -30,23 +36,25 @@ type httpClient struct {
 	baseURL string
 	client  *http.Client
 
-	headerProperty map[string]string
-	apiKey         string
+	headers   map[string]string
+	apiKey    string
+	userAgent string
 }
 
 func NewClient(opts ...OptionsClientFunc) (*httpClient, error) {
 	client := &httpClient{
-		baseURL: DefaultUrlqueryAPI,
+		baseURL:   DefaultUrlqueryAPI,
+		userAgent: DefaultUserAgent,
 		client: &http.Client{
 			Timeout: DefaultHTTPTimeout,
 		},
-		headerProperty: make(map[string]string),
+		headers: make(map[string]string),
 	}
 
 	for _, opt := range opts {
 		err := opt(client)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to apply client option: %w", err)
 		}
 	}
 	return client, nil
@@ -79,12 +87,36 @@ func (c *httpClient) NewRequest(method string, path string, body io.Reader) (*ht
 		req.Header.Add("x-apikey", c.apiKey)
 	}
 
-	req.Header.Add("User-Agent", "urlquery-cli/1.0 (+https://github.com/urlquery/urlquery-cli)")
+	req.Header.Add("User-Agent", c.userAgent)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 
 	// Add custom headers to request
-	for k, v := range c.headerProperty {
+	for k, v := range c.headers {
+		req.Header.Add(k, v)
+	}
+
+	return req, nil
+}
+
+// NewRequestWithContext creates a new HTTP request with context
+func (c *httpClient) NewRequestWithContext(ctx context.Context, method string, path string, body io.Reader) (*http.Request, error) {
+	url := c.baseURL + path
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if c.apiKey != "" {
+		req.Header.Add("x-apikey", c.apiKey)
+	}
+
+	req.Header.Add("User-Agent", c.userAgent)
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
+
+	// Add custom headers to request
+	for k, v := range c.headers {
 		req.Header.Add(k, v)
 	}
 
@@ -99,6 +131,16 @@ func (c *httpClient) Do(req *http.Request) (*http.Response, error) {
 // DoRequest makes an HTTP request and executes it.
 func (c *httpClient) DoRequest(method string, path string, body io.Reader) (*http.Response, error) {
 	req, err := c.NewRequest(method, path, body)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.Do(req)
+}
+
+// DoRequestWithContext makes an HTTP request with context and executes it.
+func (c *httpClient) DoRequestWithContext(ctx context.Context, method string, path string, body io.Reader) (*http.Response, error) {
+	req, err := c.NewRequestWithContext(ctx, method, path, body)
 	if err != nil {
 		return nil, err
 	}
