@@ -5,11 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
-	"text/tabwriter"
-	"time"
 
-	"github.com/dustin/go-humanize"
+	"github.com/urlquery/urlquery-api-go"
 	"github.com/urlquery/urlquery-cli/internal/api"
 
 	"github.com/google/uuid"
@@ -57,11 +54,7 @@ Examples:
 
 		apikey := viper.GetString("apikey")
 
-		client, err := api.NewClient(api.ApiKey(apikey))
-		if err != nil {
-			fmt.Println("Failed", err)
-			os.Exit(1)
-		}
+		client := urlquery.NewClient(apikey)
 
 		// Handle report data
 		validActions := map[string]bool{
@@ -91,40 +84,6 @@ Examples:
 
 					tmp := SummarizeReport(&parsed)
 					fmt.Println(tmp)
-					return
-
-					fmt.Printf("📝 Report Summary:  %s\n", report.ID)
-					fmt.Printf("🔗 Submitted URL:   %s\n", report.Url.Addr)
-					fmt.Printf("🔗 Final URL:       %s\n", report.Final.Url.Addr)
-					fmt.Printf("📄 Webpage Title:   %s\n", report.Final.Title)
-					fmt.Printf("🚨 Detections:      %d\n", parsed.Stats.AlertCount.Urlquery)
-					fmt.Printf("🏷️  Tags:            %s\n", strings.Join(parsed.Tags, " "))
-					fmt.Printf("🌐 HTTP Requests:   %d\n", len(report.HttpTransactions))
-
-					// Domain Summary
-					fmt.Println("\n🌍 Domain Summary:")
-					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-					fmt.Fprintf(w, "%-65s %12s %12s %12s %10s %10s %6s\n", "FQDN", "Registered", "First Seen", "Last Seen", "RX Bytes", "TX Bytes", "Alerts")
-
-					for _, v := range report.Summary {
-
-						firstSeenTime, _ := time.Parse(time.RFC3339, v.FirstSeen)
-						lastSeenTime, _ := time.Parse(time.RFC3339, v.LastSeen)
-
-						firstSeen := firstSeenTime.Format("2006-01-02")
-						lastSeen := lastSeenTime.Format("2006-01-02")
-
-						fmt.Fprintf(w, "%-65s %12s %12s %12s %10s %10s %6d\n",
-							v.Fqdn,
-							v.DomainRegistered,
-							firstSeen,
-							lastSeen,
-							humanize.Bytes(uint64(v.ReceivedData)),
-							humanize.Bytes(uint64(v.SentData)),
-							v.AlertCount,
-						)
-					}
-					w.Flush()
 
 				} else {
 					reportFilename := fmt.Sprintf("report_%s.json", report_id)

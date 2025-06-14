@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/urlquery/urlquery-cli/internal/api"
+	"github.com/urlquery/urlquery-api-go"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -30,9 +30,14 @@ Example:
 		submit_url := args[0]
 
 		apikey := viper.GetString("apikey")
+		if apikey == "" {
+			fmt.Println("Error: API Key is required. Set it via 'config set apikey <value>' or use the --apikey flag.")
+			os.Exit(1)
+		}
 
-		var job api.SubmitJob
-		job.Url = submit_url
+		job := urlquery.SubmitJob{
+			Url: submit_url,
+		}
 
 		job.UserAgent = viper.GetString("useragent")
 		if job.UserAgent == "" {
@@ -44,11 +49,8 @@ Example:
 			job.Access = "public"
 		}
 
-		client, err := api.NewClient(api.ApiKey(apikey))
-		if err != nil {
-			fmt.Println("Failed to create API client:", err)
-			os.Exit(1)
-		}
+		client := urlquery.NewClient(apikey)
+		client.Submit(job)
 
 		response, err := client.Submit(job)
 		if err != nil {
@@ -101,13 +103,9 @@ Example:
 			os.Exit(1)
 		}
 
-		client, err := api.NewClient(api.ApiKey(apikey))
-		if err != nil {
-			fmt.Println("Failed to create API client:", err)
-			os.Exit(1)
-		}
+		client := urlquery.NewClient(apikey)
 
-		response, err := client.QueueStatus(queue_id)
+		response, err := client.GetQueueStatus(queue_id)
 		if err != nil {
 			fmt.Printf("Error fetching status for Queue ID %s: %v\n", queue_id, err)
 			os.Exit(1)

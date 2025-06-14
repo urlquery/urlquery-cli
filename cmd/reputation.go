@@ -6,10 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/urlquery/urlquery-cli/internal/api"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/urlquery/urlquery-api-go"
 )
 
 var reputationCmd = &cobra.Command{
@@ -33,14 +32,10 @@ Example:
 		apikey := viper.GetString("apikey")
 
 		// Initialize API client
-		client, err := api.NewClient(api.ApiKey(apikey))
-		if err != nil {
-			fmt.Println("Failed to create API client:", err)
-			os.Exit(1)
-		}
+		client := urlquery.NewClient(apikey)
 
 		// Fetch reputation data
-		response, err := client.CheckReputation(reputation_url)
+		response, err := client.ReputationCheck(reputation_url)
 		if err != nil {
 			fmt.Printf("Error querying URL reputation: %v\n", err)
 			os.Exit(1)

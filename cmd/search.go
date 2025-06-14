@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/urlquery/urlquery-cli/internal/api"
+	"github.com/urlquery/urlquery-api-go"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -29,14 +29,14 @@ For more details check out: https://urlquery.net/help/search`,
 		apikey := viper.GetString("apikey")
 
 		// Initialize API client
-		client, err := api.NewClient(api.ApiKey(apikey))
-		if err != nil {
-			fmt.Println("Failed to create API client:", err)
-			os.Exit(1)
-		}
+		client := urlquery.NewClient(apikey)
 
-		// Perform search request
-		results, err := client.Search(search_query, limitSearch, offsetSearch)
+		// Perform search
+		query := urlquery.NewSearchParams(search_query)
+		query.Limit(limitSearch)
+		query.Offset(offsetSearch)
+
+		results, err := client.Search(query)
 		if err != nil {
 			fmt.Printf("Error searching reports: %v\n", err)
 			os.Exit(1)
