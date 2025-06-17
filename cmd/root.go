@@ -80,6 +80,11 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
 
+		// Skip API key check for config-related commands
+		if cmd.Name() == "config" || cmd.HasParent() && cmd.Parent().Name() == "config" {
+			return
+		}
+
 		// Override with flags **only if they are set**
 		if cmd.Flags().Changed("apikey") {
 			viper.Set("apikey", cmd.Flag("apikey").Value.String())
