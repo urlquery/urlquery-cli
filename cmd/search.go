@@ -19,7 +19,7 @@ var offsetSearch int
 var searchCmd = &cobra.Command{
 	Use:   "search <query>",
 	Short: "Search for reports in urlquery.net.",
-	Long: `Searches urlquery.net for reports related to a domain, IP, or keyword.
+	Long: `Searches urlquery.net for reports related to a domain, IP, keyword or text.
 For more details check out: https://urlquery.net/help/search`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {

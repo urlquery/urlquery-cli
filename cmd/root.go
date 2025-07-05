@@ -47,10 +47,12 @@ func init() {
 	viper.AutomaticEnv()
 
 	// Submit command flags
-	submitCmd.Flags().String("useragent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0", "Override default user agent")
-	submitCmd.Flags().String("access", "public", "Override default access level (public, restricted, private)")
+	submitCmd.Flags().String("useragent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0", "Custom user-agent for the submission")
+	submitCmd.Flags().String("access", "public", "Set access level: public, restricted, or private")
+	submitCmd.Flags().String("tags", "", "Comma-separated tags to label the submission (e.g. phishing,malware)")
 	viper.BindPFlag("useragent", submitCmd.Flags().Lookup("useragent"))
 	viper.BindPFlag("access", submitCmd.Flags().Lookup("access"))
+	viper.BindPFlag("tags", submitCmd.Flags().Lookup("tags"))
 	submitCmd.AddCommand(submitStatusCmd)
 
 	// Search command flags
